@@ -1,0 +1,158 @@
+// Assuming that PsychoJS has been initialized and set up elsewhere
+
+// Declare all variables at the beginning
+vars win, introText, infoText, beads, jarImage, beadsSeen, beadCount, totalBeads, finalDecision, beadImage, beadsLeftText, keys, decisionText, decisionKeys, resultText, infoTextJar, beads1, beads2, beads3;
+
+// Initialize components for visual stimuli
+win = new psychoJS.visual.Window({
+    fullscr: true,
+    color: new psychoJS.util.Color([0, 0, 0]),
+    units: 'pix'
+});
+
+// Introduction Text Stimuli
+introText = new psychoJS.visual.TextStim({
+    win: win,
+    pos: [0, 200],
+    text: "In this guessing game, you'll identify from which of two jars beads are being drawn based on their colors, red or yellow. To play, press 'space' to begin and view each bead individually. After seeing at least five beads, you may continue to draw more beads or choose to make your guess by pressing 'escape' and then selecting the jar you believe the beads are from. Take your time to make a confident decision. Have fun and good luck!",
+    color: new psychoJS.util.Color('white'),
+    height: 30,
+    wrapWidth: 1000
+});
+
+// Instruction Text Stimuli
+infoText = new psychoJS.visual.TextStim({
+    win: win,
+    text: "Press 'space' to start viewing beads.",
+    pos: [0, -350],
+    color: new psychoJS.util.Color('white'),
+    height: 30
+});
+
+// Draw introductory text
+introText.draw();
+infoText.draw();
+win.flip();
+
+// Wait for participant to press space to begin
+psychoJS.eventManager.waitKeys({keyList: ['space']});
+win.flip();  // Clear the screen after key press
+
+// Function to run a set of beads
+function runBeadSet(beads, jarImagePath) {
+    psychoJS.util.shuffle(beads);  // Shuffle the array
+
+    beadsSeen = 0;
+    beadCount = 0;
+    totalBeads = beads.length;
+    finalDecision = "";
+    psychoJS.eventManager.clearEvents();
+
+    while (beadCount < totalBeads) {
+        beadImage = new psychoJS.visual.ImageStim({
+            win: win,
+            image: beads[beadCount],
+            pos: [0, 100]
+        });
+        beadImage.draw();
+
+        beadsLeftText = new psychoJS.visual.TextStim({
+            win: win,
+            text: `${totalBeads - beadsSeen} out of ${totalBeads} beads left`,
+            pos: [0, -300],
+            color: new psychoJS.util.Color('white'),
+            height: 30
+        });
+        beadsLeftText.draw();
+
+        infoText.draw();
+        win.flip();
+
+        keys = psychoJS.eventManager.waitKeys({keyList: ['space', 'escape']});
+        if (keys.includes('space')) {
+            beadsSeen++;
+            beadCount++;
+        } else if (keys.includes('escape') && beadsSeen >= 5) {
+            break;
+        }
+    }
+
+    // Decision making about the jar
+    decisionText = new psychoJS.visual.TextStim({
+        win: win,
+        text: "Which jar do you think these beads are from? Press 'A' for Jar A or 'B' for Jar B",
+        pos: [0, -350],
+        color: new psychoJS.util.Color('white'),
+        height: 30
+    });
+
+    jarImage = new psychoJS.visual.ImageStim({
+        win: win,
+        image: jarImagePath,
+        pos: [0, 0],
+        size: [500, 500]
+    });
+    jarImage.draw();
+    decisionText.draw();
+    win.flip();
+
+    decisionKeys = psychoJS.eventManager.waitKeys({keyList: ['a', 'b']});
+    if (decisionKeys.includes('a')) {
+        finalDecision = 'Jar A';
+    } else if (decisionKeys.includes('b')) {
+        finalDecision = 'Jar B';
+    }
+
+    // Show final decision
+    resultText = new psychoJS.visual.TextStim({
+        win: win,
+        text: `Beads seen: ${beadsSeen}\nFinal decision: ${finalDecision}`,
+        pos: [0, -350],
+        color: new psychoJS.util.Color('white'),
+        height: 30
+    });
+    resultText.draw();
+    win.flip();
+
+    // Ensure the message is displayed for a sufficient time
+    psychoJS.window.callOnFlip(function() {
+        psychoJS.clock.wait(3.0);  // Wait for 3 seconds
+    });
+}
+
+// Define and randomize beads for the first set
+beads1 = [
+    'jtc_diss/yellow.jpg', 'jtc_diss/yellow_copy.jpg', 'jtc_diss/yellow_copy2.jpg', 'jtc_diss/yellow_copy3.jpg',
+    'jtc_diss/yellow_copy4.jpg', 'jtc_diss/yellow_copy5.jpg', 'jtc_diss/yellow_copy6.jpg', 'jtc_diss/yellow_copy7.jpg',
+    'jtc_diss/red.jpg', 'jtc_diss/red_copy.jpg'
+];
+beads1 = beads1.concat(beads1);  // Double the array for 20 beads
+
+// Run the first set of beads
+runBeadSet(beads1, 'jtc_diss/jar80.jpg');
+
+// Define and randomize beads for the second set (8 red, 12 yellow)
+beads2 = [
+    'jtc_diss/yellow.jpg', 'jtc_diss/yellow_copy.jpg', 'jtc_diss/yellow_copy2.jpg', 'jtc_diss/yellow_copy3.jpg',
+    'jtc_diss/yellow_copy4.jpg', 'jtc_diss/yellow_copy5.jpg', 'jtc_diss/yellow_copy6.jpg', 'jtc_diss/yellow_copy7.jpg',
+    'jtc_diss/red.jpg', 'jtc_diss/red_copy.jpg', 'jtc_diss/red_copy2.jpg', 'jtc_diss/red_copy3.jpg', 
+    'jtc_diss/red_copy4.jpg', 'jtc_diss/red_copy5.jpg', 'jtc_diss/red_copy6.jpg', 'jtc_diss/red_copy7.jpg'
+];
+beads2 = beads2.concat(beads2);  // Double the array for 20 beads
+
+// Run the second set of beads
+runBeadSet(beads2, 'jtc_diss/jar70.jpg');
+
+// Define and randomize beads for the third set (more yellow and red)
+beads3 = [
+    'jtc_diss/yellow.jpg', 'jtc_diss/yellow_copy.jpg', 'jtc_diss/red_copy2.jpg', 'jtc_diss/red_copy3.jpg',
+    'jtc_diss/red_copy4.jpg', 'jtc_diss/red_copy5.jpg', 'jtc_diss/yellow_copy6.jpg', 'jtc_diss/yellow_copy7.jpg',
+    'jtc_diss/red.jpg', 'jtc_diss/red_copy.jpg'
+];
+beads3 = beads3.concat(beads3);  // Double the array for 20 beads
+
+// Run the third set of beads
+runBeadSet(beads3, 'jtc_diss/jar60.jpg');
+
+psychoJS.window.close();
+psychoJS.quit({message: 'The experiment has ended.', isCompleted: true});
